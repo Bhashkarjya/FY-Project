@@ -1,0 +1,31 @@
+{
+  "name": "fyproject",
+  "version": "1.0.0",
+  "description": "B.Tech Final Year Project to detect counterfeit products using blockchain technology",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --watchAll",
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "dev-peer": "cross-env GENERATE_PEER_PORT='true' nodemon index.js"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  },
+  "author": "Bhashkarjya Nath, Mayur Prasanna, Robin Verma",
+  "license": "ISC",
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "jest": "^23.6.0",
+    "nodemon": "^2.0.15"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "elliptic": "^6.4.1",
+    "express": "^4.17.2",
+    "hex-to-binary": "^1.0.1",
+    "pubnub": "^4.37.0",
+    "request": "^2.88.2",
+    "uuid": "^3.4.0"
+  }
+}
