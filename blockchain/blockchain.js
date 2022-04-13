@@ -10,7 +10,7 @@ class Blockchain{
         this.chain = [Block.genesis()];
     }
 
-    addBlock(data){
+    addBlock({data}){
         const newBlock = Block.mineBlock({
             lastBlock:this.chain[this.chain.length-1],
             data
@@ -40,29 +40,9 @@ class Blockchain{
         return true;
     }
 
-    replaceChain(chain, validateTransactions, onSuccess){
-        if(chain.length <= this.chain.length) {
-            console.log('The incoming chain must be longer.');
-            return;
-        }
-        
-        if(Blockchain.isValidChain(chain) == false) {
-            console.log('The incoming chain must be valid');
-            return;
-        }
-
-        if (validateTransactions && !this.validTransactionData({chain})) {
-            console.error('The incoming chain has invalid data');
-            return;
-        }
-
-        if (onSuccess) onSuccess();
-        console.log('replacing chain with ' ,chain);
-        this.chain = chain;
-    }
-
     validTransactionData({ chain }) {
-        for(let i=1;i<chain.length;i++){
+        for(let i=1;i<chain.length;i++)
+        {
             const block = chain[i];
             const transactionSet = new Set(); 
             let rewardTransactionCount = 0;
@@ -80,7 +60,8 @@ class Blockchain{
                         console.error('Miner reward amount is invalid');
                         return false;
                     }
-                } else {
+                }
+                else {
                     if(!Transaction.validTransaction(transaction)) {
                         console.error('Invalid Transaction');
                         return false;
@@ -105,10 +86,31 @@ class Blockchain{
                     }
                 }
             }
-
         }
+        console.log('reached here');
         
         return true;
+    }
+
+    replaceChain(chain, validateTransactions, onSuccess){
+        if(chain.length <= this.chain.length) {
+            console.log('The incoming chain must be longer.');
+            return;
+        }
+        
+        if(Blockchain.isValidChain(chain) == false) {
+            console.log('The incoming chain must be valid');
+            return;
+        }
+
+        if (validateTransactions && ! this.validTransactionData({chain})) {
+            console.error('The incoming chain has invalid data');
+            return;
+        }
+
+        if (onSuccess) onSuccess();
+        console.log('replacing chain with ' ,chain);
+        this.chain = chain;
     }
 }
 

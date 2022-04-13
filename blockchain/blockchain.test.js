@@ -26,7 +26,7 @@ describe('Blockchain', () => {
 
     it('adds a new block to the blockchain', () => {
         const newData = 'new-data';
-        blockchain.addBlock(newData);
+        blockchain.addBlock({data: newData});
         expect(blockchain.chain[blockchain.chain.length - 1].data).toEqual(newData);
     });
 
@@ -111,10 +111,10 @@ describe('Blockchain', () => {
             });
         });
 
-        describe('and the validateTransactions flag is true', () => {
+        describe('and the `validateTransactions` flag is true', () => {
             it('calls validTransactionData()', () => {
                 const validTransactionDataMock = jest.fn();
-                blockchain.validTransactionData = validTransactionDataMock();
+                blockchain.validTransactionData = validTransactionDataMock;
 
                 newChain.addBlock({ data: 'foo'});
                 blockchain.replaceChain(newChain.chain, true);
@@ -190,7 +190,7 @@ describe('Blockchain', () => {
                         address: wallet.publicKey,
                         signature: wallet.sign(evilOutputMap)
                     },
-                    output: evilOutputMap
+                    outputMap: evilOutputMap
                 }
                 
                 newChain.addBlock({ data: [evilTransaction, rewardTransaction]});

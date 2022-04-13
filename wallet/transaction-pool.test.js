@@ -1,7 +1,7 @@
 const TransactionPool = require('./transaction-pool');
 const Transaction = require('./transaction');
 const Wallet = require('./index');
-const Blockchain = require('../blockchain');
+const Blockchain = require('../blockchain/blockchain');
 
 describe('TransactionPool', () => {
     let transactionPool, transaction, senderWallet;
@@ -24,8 +24,8 @@ describe('TransactionPool', () => {
 
     describe('existingTransaction', () => {
         it('returns an existing transaction given an input instance', () => {
-            transaction.setTransaction(transaction);
-            expect(transaction.existingTransaction({inputAddress: senderWallet.publicKey})).toBe(transaction);
+            transactionPool.setTransaction(transaction);
+            expect(transactionPool.existingTransaction({inputAddress: senderWallet.publicKey})).toBe(transaction);
         });
     });
 
@@ -57,11 +57,11 @@ describe('TransactionPool', () => {
         });
 
         it('returns valid transactions', () => {
-            expect(transactionPool.validTransactions()).toEqual(validTransactions);
+            expect(transactionPool.validTransaction()).toEqual(validTransactions);
         });
 
         it('logs errors for the invalid transactions', () => {
-            transactionPool.validTransactions();
+            transactionPool.validTransaction();
             expect(errorMock).toHaveBeenCalled();
           });
 
