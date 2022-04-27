@@ -7,7 +7,8 @@ const TransactionPool = require('./wallet/transaction-pool');
 const Wallet = require('./wallet');
 const PubSub = require('./app/pubsub');
 const TransactionMiner = require('./app/transaction-miner'); 
-const exp = require('constants');
+
+const isDevelopment = process.env.ENV === 'development';
 
 const app = express();
 const blockchain = new Blockchain();
@@ -75,60 +76,76 @@ app.get('/api/wallet-info', (req, res) => {
         address,
         balance: Wallet.calculateBalance({ chain: blockchain.chain, address})
     });
-})
+});
+
+app.get('/api/known-addresses', (req, res) => {
+    const addressMap = {};
+  
+    for (let block of blockchain.chain) {
+      for (let transaction of block.data) {
+        const recipient = Object.keys(transaction.outputMap);
+  
+        recipient.forEach(recipient => addressMap[recipient] = recipient);
+      }
+    }
+  
+    res.json(Object.keys(addressMap));
+  });
 
 app.get('*',(req,res) => {
     res.sendFile(path.join(__dirname,'./client/dist/index.html'));
 });
 
-const walletFoo = new Wallet();
-const walletBar = new Wallet();
+if(isDevelopment)
+{
+    const walletFoo = new Wallet();
+    const walletBar = new Wallet();
 
-const generateWalletTransaction = ({wallet, recipient, amount}) => {
-    const transaction = wallet.createTransaction({
-        recipient, amount, chain: blockchain.chain
+    const generateWalletTransaction = ({wallet, recipient, amount}) => {
+        const transaction = wallet.createTransaction({
+            recipient, amount, chain: blockchain.chain
+        });
+
+        transactionPool.setTransaction(transaction);
+    };
+
+    const walletAction = () => generateWalletTransaction({
+        wallet, recipient: walletFoo.publicKey, amount: 5
     });
 
-    transactionPool.setTransaction(transaction);
-};
+    const walletFooAction = () => generateWalletTransaction({
+        wallet, recipient: walletBar.publicKey, amount: 10
+    });
 
-const walletAction = () => generateWalletTransaction({
-    wallet, recipient: walletFoo.publicKey, amount: 5
-});
+    const walletBarAction = () => generateWalletTransaction({
+        wallet, recipient: walletFoo.publicKey, amount: 15
+    });
 
-const walletFooAction = () => generateWalletTransaction({
-    wallet, recipient: walletBar.publicKey, amount: 10
-});
+    for(let i = 0; i < 10; i++)
+    {
+        if(i%3 == 0){
+            walletAction();
+            walletFooAction();
+        }
+        else if(i%3 == 1){
+            walletAction();
+            walletBarAction();
+        }
+        else{
+            walletBarAction();
+            walletFooAction();
+        }
 
-const walletBarAction = () => generateWalletTransaction({
-    wallet, recipient: walletFoo.publicKey, amount: 15
-});
-
-for(let i = 0; i < 10; i++)
-{
-    if(i%3 == 0){
-        walletAction();
-        walletFooAction();
+        transactionMiner.mineTransactions();
     }
-    else if(i%3 == 1){
-        walletAction();
-        walletBarAction();
-    }
-    else{
-        walletBarAction();
-        walletFooAction();
-    }
-
-    transactionMiner.mineTransactions();
 }
-
 
 var PEER_PORT;
 
 if(process.env.GENERATE_PEER_PORT === 'true'){
     PEER_PORT = DEFAULT_PORT + Math.ceil(Math.random()*1000);
 }
-const PORT = PEER_PORT || DEFAULT_PORT;
+const PORT = process.env.PORT || PEER_PORT || DEFAULT_PORT;
 
 const syncWithRootState = () => {
     request({url: `${ROOT_ADDRESS_NODE}/api/blocks`}, (error,response,body) => {
