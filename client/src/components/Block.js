@@ -11,12 +11,28 @@ class Block extends Component {
 
   get displayTransaction() {
     const { data } = this.props.block;
+    const product = data[0];
+    console.log(data[0]);
 
     const stringifiedData = JSON.stringify(data);
-
-    const dataDisplay = stringifiedData.length > 35 ?
+    let dataDisplay;
+    dataDisplay = stringifiedData.length > 35 ?
       `${stringifiedData.substring(0, 35)}...` :
       stringifiedData;
+
+    if(data.length>0 && product.pId)
+    {
+      dataDisplay = stringifiedData;
+      return(
+        <div>
+          Product details<br/>
+          Product Id: {product.pId} <br/>
+          Product Name: {product.pName} <br/>
+          Product Price: {product.price} <br/>
+          Product Owner: {product.pOwner} <br/>
+        </div>
+      )
+    }
 
     if (this.state.displayTransaction) {
       return (

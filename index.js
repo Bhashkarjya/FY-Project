@@ -7,6 +7,7 @@ const TransactionPool = require('./wallet/transaction-pool');
 const Wallet = require('./wallet');
 const PubSub = require('./app/pubsub');
 const TransactionMiner = require('./app/transaction-miner'); 
+const { log } = require('console');
 
 const isDevelopment = process.env.ENV === 'development';
 
@@ -58,6 +59,13 @@ app.post('/api/transact', (req,res) => {
     pubsub.broadcastTransaction(transaction);
 
     res.json({ transaction });
+});
+
+app.post('/api/addProduct', (req,res) => {
+  const data = {data: [req.body]};
+  blockchain.addBlock(data);
+  pubsub.broadcastChain();
+  res.redirect('/api/blocks');
 });
 
 app.get('/api/transaction-pool-map', (req,res) => {

@@ -4,13 +4,7 @@ import { Link } from 'react-router-dom';
 import history from '../history';
 
 class AddProduct extends Component {
-  state = { pId: 0, pName: '', price: 0, manufacturedDate: '',expiryDate: '', pOwner:'', knownAddresses: [] };
-
-  componentDidMount() {
-    fetch(`${document.location.origin}/api/known-addresses`)
-      .then(response => response.json())
-      .then(json => this.setState({ knownAddresses: json }));
-  }
+  state = { pId: 0, pName: '', price: 0, pOwner:''};
 
   updateId = event => {
     this.setState({ pId: Number(event.target.value) });
@@ -21,32 +15,23 @@ class AddProduct extends Component {
   }
 
   updatePrice = event => {
-    this.setState({ amount: Number(event.target.value) });
-  }
-
-  updateManufacturedDate = event => {
-    this.setState( {manufacturedDate: event.target.value});
-  }
-
-  updateExpiryDate = event => {
-    this.setState( {expiryDate: event.target.value});
+    this.setState({ price: Number(event.target.value) });
   }
 
   updateOwner = event => {
     this.setState( {pOwner: event.target.value});
   }
 
-  conductTransaction = () => {
-    const  {pId, pName, price, manufacturedDate, expiryDate, pOwner} = this.state;
+  addNewProduct = () => {
+    const  {pId, pName, price,pOwner} = this.state;
 
-    fetch(`${document.location.origin}/api/transact`, {
+    fetch(`${document.location.origin}/api/addProduct`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pId, pName, price, manufacturedDate, expiryDate, pOwner })
+      body: JSON.stringify({ pId, pName, price, pOwner })
     }).then(response => response.json())
       .then(json => {
         alert(json.message || json.type);
-        history.push('/transaction-pool');
       });
   }
 
@@ -56,37 +41,42 @@ class AddProduct extends Component {
         <Link to='/'>Home</Link>
         <h3>Add a Product</h3>
         <br />
-        {
-          this.state.knownAddresses.map(knownAddress => {
-            return (
-              <div key={knownAddress}>
-                <div>{knownAddress}</div>
-                <br />
-              </div>
-            );
-          })
-        }
-        <br />
+        <FormGroup>
+          <FormControl
+            input='number'
+            placeholder='Product Id'
+            value={this.state.pId}
+            onChange={this.updateId}
+          />
+        </FormGroup>
         <FormGroup>
           <FormControl
             input='text'
-            placeholder='recipient'
-            value={this.state.recipient}
-            onChange={this.updateRecipient}
+            placeholder='Product Name'
+            value={this.state.pName}
+            onChange={this.updateName}
+          />
+        </FormGroup>
+		<FormGroup>
+          <FormControl
+            input='number'
+            placeholder='Price'
+            value={this.state.price}
+            onChange={this.updatePrice}
           />
         </FormGroup>
         <FormGroup>
           <FormControl
             input='number'
-            placeholder='amount'
-            value={this.state.amount}
-            onChange={this.updateAmount}
+            placeholder='Product Owner'
+            value={this.state.pOwner}
+            onChange={this.updateOwner}
           />
         </FormGroup>
         <div>
           <Button
             bsStyle="danger"
-            onClick={this.conductTransaction}
+            onClick={this.addNewProduct}
           >
             Submit
           </Button>

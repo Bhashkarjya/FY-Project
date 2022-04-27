@@ -16,7 +16,7 @@ render(
             <Route path = '/blocks' component = {Blocks}/>
             <Route path = '/conduct-transaction' component = {ConductTransaction} />
             <Route path = '/transaction-pool' component = {TransactionPool} />
-            <Route path = '/addProduct' component={AddProduct} />
+            <Route path = '/add-product' component={AddProduct} />
         </Switch>
     </Router>,
     document.getElementById('root')
