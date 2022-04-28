@@ -2,12 +2,13 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const request = require('request');
 const path = require('path');
+const uuid = require('uuid/v1');
 const Blockchain = require('./blockchain/blockchain');
 const TransactionPool = require('./wallet/transaction-pool');
 const Wallet = require('./wallet');
 const PubSub = require('./app/pubsub');
 const TransactionMiner = require('./app/transaction-miner'); 
-const { log } = require('console');
+const cryptoHash = require('./utils/crypto-hash');
 
 const isDevelopment = process.env.ENV === 'development';
 
@@ -62,6 +63,16 @@ app.post('/api/transact', (req,res) => {
 });
 
 app.post('/api/addProduct', (req,res) => {
+  let product = JSON.parse(req.body);
+
+  console.log("req.body", req.body);
+  console.log("product", product);
+
+  let productDetails = product.pDetails;
+  const wallet = product.wallet;
+  productDetails.qrid = uuid();
+  console.log("wallet", wallet);
+  console.log("product Details",productDetails);
   const data = {data: [req.body]};
   blockchain.addBlock(data);
   pubsub.broadcastChain();
@@ -83,6 +94,14 @@ app.get('/api/wallet-info', (req, res) => {
     res.json({ 
         address,
         balance: Wallet.calculateBalance({ chain: blockchain.chain, address})
+    });
+});
+
+app.get('/api/getWallet', (req,res) => {
+    const keyPair = wallet.keyPair;
+    const address = wallet.publicKey;
+    res.json({
+        wallet
     });
 });
 
