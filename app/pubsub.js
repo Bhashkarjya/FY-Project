@@ -9,7 +9,8 @@ const credentials = {
 const CHANNELS = {
     TEST : 'TEST',
     BLOCKCHAIN : 'BLOCKCHAIN',
-    TRANSACTION : 'TRANSACTION'
+    TRANSACTION : 'TRANSACTION',
+    PRODUCT : 'PRODUCT'
 };
 
 class PubSub {
@@ -48,6 +49,9 @@ class PubSub {
                             this.transactionPool.setTransaction(parsedMessage);
                         }
                         break;
+                    case CHANNELS.PRODUCT:
+                        this.blockchain.replaceChain(parsedMessage);
+                        break;
                     default:
                         return;
                 }   
@@ -65,6 +69,10 @@ class PubSub {
 
     broadcastTransaction(transaction){
         this.publish({channel: CHANNELS.TRANSACTION, message: JSON.stringify(transaction)})
+    }
+
+    broadcastBlock(){
+        this.publish({channel: CHANNELS.PRODUCT, message: JSON.stringify(this.blockchain.chain)})
     }
 }
 

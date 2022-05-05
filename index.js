@@ -2,12 +2,13 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const request = require('request');
 const path = require('path');
+const uuid = require('uuid/v1');
 const Blockchain = require('./blockchain/blockchain');
 const TransactionPool = require('./wallet/transaction-pool');
 const Wallet = require('./wallet');
 const PubSub = require('./app/pubsub');
 const TransactionMiner = require('./app/transaction-miner'); 
-const { log } = require('console');
+const Product = require('./product');
 
 const isDevelopment = process.env.ENV === 'development';
 
@@ -17,7 +18,7 @@ const transactionPool = new TransactionPool();
 const wallet = new Wallet();
 const pubsub = new PubSub({blockchain, transactionPool, wallet});
 const transactionMiner = new TransactionMiner({ blockchain, transactionPool, wallet, pubsub });
-
+const productList = new Product();
 const DEFAULT_PORT = 3000;
 const ROOT_ADDRESS_NODE =  `http://localhost:${DEFAULT_PORT}`;
 
@@ -37,17 +38,20 @@ app.post('/api/mine', (req,res) => {
 });
 
 app.post('/api/transact', (req,res) => {
-    const {recipient, amount} = req.body;
+    const {recipient, amount, product} = req.body;
+    const newProduct = productList.productDatabase.get(product);
+    //take care of the testcase when the user enters a product not present in the database
     let transaction = transactionPool.existingTransaction({ inputAddress: wallet.publicKey});
     try{
         if(transaction){
-            transaction.update({senderWallet: wallet, recipient, amount});
+            transaction.update({senderWallet: wallet, recipient, amount, product : newProduct});
         }
         else{
             transaction = wallet.createTransaction({
                 recipient,
                 amount,
-                chain: blockchain.chain
+                chain: blockchain.chain,
+                product : newProduct
             });
         }
     } catch(error){
@@ -58,15 +62,21 @@ app.post('/api/transact', (req,res) => {
 
     pubsub.broadcastTransaction(transaction);
 
-    res.json({ transaction });
+    res.json({ type: 'success' , transaction });
 });
 
 app.post('/api/addProduct', (req,res) => {
-  const data = {data: [req.body]};
-  blockchain.addBlock(data);
-  pubsub.broadcastChain();
-  res.redirect('/api/blocks');
-});
+    let product = req.body;
+    product.qrid = uuid();
+    const signedDetails = wallet.sign(product); //product Details signed by the manufactured's public key
+    product.source = wallet.publicKey;
+    product.signedDetails = signedDetails;
+    const data = {data: [req.body]};
+    productList.addProduct(product.pId, product);
+    blockchain.addBlock(data);
+    pubsub.broadcastBlock();
+    res.redirect('/api/blocks');
+  });
 
 app.get('/api/transaction-pool-map', (req,res) => {
     res.json(transactionPool.transactionMap);
@@ -91,9 +101,11 @@ app.get('/api/known-addresses', (req, res) => {
   
     for (let block of blockchain.chain) {
       for (let transaction of block.data) {
-        const recipient = Object.keys(transaction.outputMap);
-  
-        recipient.forEach(recipient => addressMap[recipient] = recipient);
+        if(transaction.outputMap)
+        {
+            const recipient = Object.keys(transaction.outputMap);
+            recipient.forEach(recipient => addressMap[recipient] = recipient);
+        }
       }
     }
   
@@ -169,7 +181,6 @@ const syncWithRootState = () => {
     request({url: `${ROOT_ADDRESS_NODE}/api/transaction-pool-map`}, (error, response, body) => {
         if(!error && response.statusCode === 200){
             const rootTransactionPoolMap = JSON.parse(body);
-            console.log('replace transaction pool map on a sync with', rootTransactionPoolMap);
             transactionPool.setMap(rootTransactionPoolMap);
         }
     });

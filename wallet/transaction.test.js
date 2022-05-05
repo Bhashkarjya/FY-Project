@@ -4,13 +4,14 @@ const { verifySignature } = require('../utils');
 const {REWARD_INPUT, MINING_REWARD } = require('../config');
 
 describe('Transaction', () => {
-    let transaction, senderWallet, recipient, amount;
+    let transaction, senderWallet, recipient, amount, product;
 
     beforeEach(() => {
         senderWallet = new Wallet();
         recipient = 'recipient-public-key';
         amount = 50;
-        transaction = new Transaction({senderWallet, recipient, amount});
+        product = 10
+        transaction = new Transaction({senderWallet, recipient, amount, product});
     });
 
     it('has an `id`', () => {

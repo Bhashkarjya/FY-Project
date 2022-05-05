@@ -16,7 +16,7 @@ class Wallet{
         return this.keyPair.sign(cryptoHash(data));
     }
 
-    createTransaction({amount, recipient, chain}){
+    createTransaction({amount, recipient, chain, product}){
         if( chain ) {
             this.balance = Wallet.calculateBalance({
                 chain,
@@ -30,7 +30,8 @@ class Wallet{
         return new Transaction({
             senderWallet: this,
             amount,
-            recipient
+            recipient,
+            product
         });
     }
 
@@ -40,8 +41,8 @@ class Wallet{
 
         for(let i=chain.length-1; i>0; i--){
             const block = chain[i];
-            console.log(block);
             for(let transaction of block.data) {
+                console.log(transaction.input);
                 if(transaction.input)
                 {
                     if(transaction.input.address === address){

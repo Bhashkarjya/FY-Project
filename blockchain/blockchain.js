@@ -67,15 +67,15 @@ class Blockchain{
                         return false;
                     }
 
-                    const trueBalance = Wallet.calculateBalance({
-                        chain: this.chain,
-                        address: transaction.input.address
-                    });
+                    // const trueBalance = Wallet.calculateBalance({
+                    //     chain: this.chain,
+                    //     address: transaction.input.address
+                    // });
 
-                    if (transaction.input.amount !== trueBalance) {
-                        console.error('Invalid Input Amount');
-                        return false;
-                    }
+                    // if (transaction.input.amount !== trueBalance) {
+                    //     console.error('Invalid Input Amount');
+                    //     return false;
+                    // }
 
 
                     if (transactionSet.has(transaction)) {
@@ -87,13 +87,12 @@ class Blockchain{
                 }
             }
         }
-        console.log('reached here');
         
         return true;
     }
 
     replaceChain(chain, validateTransactions, onSuccess){
-        if(chain.length <= this.chain.length) {
+        if(chain.length < this.chain.length) {
             console.log('The incoming chain must be longer.');
             return;
         }
@@ -109,7 +108,6 @@ class Blockchain{
         }
 
         if (onSuccess) onSuccess();
-        console.log('replacing chain with ' ,chain);
         this.chain = chain;
     }
 }

@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 import { FormGroup, FormControl, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import history from '../history';
 
 class AddProduct extends Component {
-  state = { pId: 0, pName: '', price: 0, pOwner:''};
+  state = { pId: 10, pName: 'abc', price: 20, pOwner:'xyz'};
 
   updateId = event => {
     this.setState({ pId: Number(event.target.value) });
@@ -24,18 +23,18 @@ class AddProduct extends Component {
 
   addNewProduct = () => {
     const  {pId, pName, price,pOwner} = this.state;
-
     fetch(`${document.location.origin}/api/addProduct`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pId, pName, price, pOwner })
+      body: JSON.stringify({ pId, pName, price, pOwner} )
     }).then(response => response.json())
       .then(json => {
         alert(json.message || json.type);
       });
-  }
+    }
 
   render() {
+    console.log("wallet", this.state.walletInfo);
     return (
       <div className='ConductTransaction'>
         <Link to='/'>Home</Link>
@@ -57,7 +56,7 @@ class AddProduct extends Component {
             onChange={this.updateName}
           />
         </FormGroup>
-		<FormGroup>
+		    <FormGroup>
           <FormControl
             input='number'
             placeholder='Price'
