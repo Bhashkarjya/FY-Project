@@ -12,8 +12,6 @@ class TransactionMiner {
     mineTransactions() {
         // Get the transaction pool's valid transactions
         const validTransactions = this.transactionPool.validTransaction();
-        console.log("valid Transaction: ", validTransactions);
-        
         // Generate the miner's rewards
         validTransactions.push(
             Transaction.rewardTransaction({ minerWallet: this.wallet })
@@ -22,7 +20,6 @@ class TransactionMiner {
 
         // add a block consisting of these transactions to the blockchain
         this.blockchain.addBlock({ data: validTransactions });
-
 
         // Broadcast the updated blockchain
         this.pubsub.broadcastChain();

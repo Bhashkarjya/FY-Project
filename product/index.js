@@ -1,4 +1,4 @@
-class Product{
+class ProductList{
     constructor()
     {
         this.productDatabase = new Map();
@@ -10,4 +10,4 @@ class Product{
     }
 }
 
-module.exports = Product;
+module.exports = ProductList;

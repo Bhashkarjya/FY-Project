@@ -106,7 +106,6 @@ class Blockchain{
             console.error('The incoming chain has invalid data');
             return;
         }
-
         if (onSuccess) onSuccess();
         this.chain = chain;
     }

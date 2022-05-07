@@ -46,7 +46,7 @@ class Transaction{
             console.error(`Invalid transaction from ${address}`);
             return false;
         }
-
+        console.log("true");
         return true;
     }
 

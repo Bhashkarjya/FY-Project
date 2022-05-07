@@ -42,7 +42,6 @@ class Wallet{
         for(let i=chain.length-1; i>0; i--){
             const block = chain[i];
             for(let transaction of block.data) {
-                console.log(transaction.input);
                 if(transaction.input)
                 {
                     if(transaction.input.address === address){

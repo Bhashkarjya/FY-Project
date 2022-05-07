@@ -8,7 +8,9 @@ const TransactionPool = require('./wallet/transaction-pool');
 const Wallet = require('./wallet');
 const PubSub = require('./app/pubsub');
 const TransactionMiner = require('./app/transaction-miner'); 
-const Product = require('./product');
+const ProductList = require('./product');
+const QRCode = require('./product/qrcode');
+const localAuthentication = require('./validation/localAuthentication');
 
 const isDevelopment = process.env.ENV === 'development';
 
@@ -18,7 +20,7 @@ const transactionPool = new TransactionPool();
 const wallet = new Wallet();
 const pubsub = new PubSub({blockchain, transactionPool, wallet});
 const transactionMiner = new TransactionMiner({ blockchain, transactionPool, wallet, pubsub });
-const productList = new Product();
+const productList = new ProductList();
 const DEFAULT_PORT = 3000;
 const ROOT_ADDRESS_NODE =  `http://localhost:${DEFAULT_PORT}`;
 
@@ -67,15 +69,23 @@ app.post('/api/transact', (req,res) => {
 
 app.post('/api/addProduct', (req,res) => {
     let product = req.body;
-    product.qrid = uuid();
     const signedDetails = wallet.sign(product); //product Details signed by the manufactured's public key
     product.source = wallet.publicKey;
+    product.keyPair = wallet.keyPair;
     product.signedDetails = signedDetails;
     const data = {data: [req.body]};
+
+    const qrData = JSON.stringify({pDetails: product, signedPDetails: signedDetails});
+    const newQR = new QRCode();
+    newQR.generateQR({data: qrData});
+    product.qrCode = newQR;
+
     productList.addProduct(product.pId, product);
     blockchain.addBlock(data);
     pubsub.broadcastBlock();
-    res.redirect('/api/blocks');
+
+
+    res.json({type: 'success'});
   });
 
 app.get('/api/transaction-pool-map', (req,res) => {
